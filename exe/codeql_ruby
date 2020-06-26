@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require "codeql_ruby"
+
+filepath = ARGV[1]
+Extractor.new(filepath).extract!
