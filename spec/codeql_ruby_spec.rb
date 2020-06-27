@@ -6,7 +6,6 @@ RSpec.describe CodeqlRuby do
   it "extracts the things" do
     filepath = File.join(File.expand_path(File.dirname(__FILE__)), 'unsafe_command.rb')
     results = described_class.extract(filepath)
-    pp results
     expect(results.first).to eq(:program)
   end
 end

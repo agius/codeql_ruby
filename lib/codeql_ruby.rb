@@ -6,7 +6,7 @@ module CodeqlRuby
 
   module_function
 
-  def extract(filepath)
-    Extractor.new(filepath).extract!
+  def extract
+    Extractor.new.extract!
   end
 end

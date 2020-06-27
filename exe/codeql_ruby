@@ -2,5 +2,19 @@
 
 require "codeql_ruby"
 
-filepath = ARGV[1]
-Extractor.new(filepath).extract!
+# when being run by the codeql binary, there are no arguments
+# but the following env vars are available:
+#
+# codeql database create <db_dir> --language=ruby
+#
+# CODEQL_EXTRACTOR_RUBY_SOURCE_ARCHIVE_DIR=<db_dir>/src
+# CODEQL_PLATFORM=osx64
+# CODEQL_EXTRACTOR_RUBY_LOG_DIR=<db_dir>/log
+# CODEQL_DIST=/Users/<whoami>/codeql-home/codeql
+# CODEQL_EXTRACTOR_RUBY_SCRATCH_DIR=<db_dir>/working
+# CODEQL_JAVA_HOME=/Users/<whoami>/codeql-home/codeql/tools/osx64/java
+# CODEQL_EXTRACTOR_RUBY_WIP_DATABASE=<db_dir>
+# CODEQL_EXTRACTOR_RUBY_TRAP_DIR=<db_dir>/trap/ruby
+# JAVA_MAIN_CLASS_50625=com.semmle.cli2.CodeQL
+
+CodeqlRuby.extract
