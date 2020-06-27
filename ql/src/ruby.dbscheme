@@ -1,3 +1,5 @@
 /** dbscheme for Ruby, feel free to edit. I don't know what I'm doing ^_^; */
 
+sourceLocationPrefix(varchar(900) prefix : string ref);
+
 leaf_nodes(unique int id: @leaf_node, string text: string ref, int beginLine: int ref, int beginColumn: int ref)

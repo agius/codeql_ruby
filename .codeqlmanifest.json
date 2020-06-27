@@ -1,0 +1,2 @@
+{ "provide": [ "ql/src/qlpack.yml" ],
+  "ignore": [ "the-extractor-which-needs-to-be-built" ] }

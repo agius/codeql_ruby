@@ -5,7 +5,9 @@ require 'zlib'
 module CodeqlRuby
   class Extractor
 
-    attr_reader :trap_dir, :wip_dir, :src_dir, :gem_root, :filepath
+    IDX_START = 10000
+
+    attr_reader :trap_dir, :wip_dir, :src_dir
 
     # env vars set by codeql binaries / scripts
     #
@@ -20,9 +22,6 @@ module CodeqlRuby
     # JAVA_MAIN_CLASS_50625=com.semmle.cli2.CodeQL
 
     def initialize
-      @gem_root = File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
-      @filepath = Dir['**/*.rb'].find { |p| p =~ /unsafe_command\.rb$/ }
-
       @wip_dir = setup_env_dir('CODEQL_EXTRACTOR_RUBY_WIP_DATABASE')
       @trap_dir = setup_env_dir('CODEQL_EXTRACTOR_RUBY_TRAP_DIR')
       @src_dir = setup_env_dir('CODEQL_EXTRACTOR_RUBY_SOURCE_ARCHIVE_DIR')
@@ -38,10 +37,28 @@ module CodeqlRuby
     end
 
     def extract!
+      src_file = Dir['**/*.rb'].find { |p| p =~ /unsafe_command\.rb$/ }
+      expanded_path = File.expand_path(src_file)
+      extract_file(expanded_path)
+    end
+
+    def extract_file(filepath)
+      copy_file_to_src(filepath)
+      trapfile_for_code(filepath)
+    end
+
+    def copy_file_to_src(filepath)
+      src = File.expand_path(filepath)
+      dest = File.join(src_dir, src)
+      FileUtils.mkdir_p(File.dirname(dest))
+      FileUtils.cp(src, dest)
+    end
+
+    def trapfile_for_code(filepath)
       contents = File.read(filepath)
       structure = Ripper.sexp(contents)
       trap_contents = ""
-      idx = 0
+      idx = IDX_START
       Node.new(structure).visit do |leaf_node|
         idx += 1
         trap_contents << "leaf_nodes(#{idx}, \"#{leaf_node.sexp[1]}\", #{leaf_node.sexp[2][0]}, #{leaf_node.sexp[2][1]})"
@@ -59,35 +76,6 @@ module CodeqlRuby
         gz.orig_name = File.basename(trapfile_path)
         gz.write IO.binread(trapfile_path)
       end
-    end
-
-    # not used yet
-    def extract_file(filepath)
-      copy_file_to_src(filepath)
-    end
-
-    # not used yet
-    def copy_file_to_src(filepath)
-      src = File.expand_path(filepath)
-      dest = File.join(src_dir, src)
-      FileUtils.mkdir_p(File.dirname(dest))
-      FileUtils.cp(src, dest)
-    end
-
-    def output_src_zip!
-      src_zip_path = File.join(wip_dir, 'src.zip')
-      Zlib::GzipWriter.open(src_zip_path) do |gz|
-        gz.mtime = File.mtime(filepath)
-        gz.orig_name = File.basename(filepath)
-        gz.write IO.binread(filepath)
-      end
-    end
-
-    def copy_dbscheme!
-      dbscheme_in_path = File.join(gem_root, 'ql', 'src', 'ruby.dbscheme')
-      dbscheme_out_path = File.join(wip_dir, 'db-ruby', 'ruby.dbscheme')
-      FileUtils.mkdir_p(File.dirname(dbscheme_out_path))
-      FileUtils.cp dbscheme_in_path, dbscheme_out_path
     end
 
     class Node
