@@ -1,38 +1,150 @@
-# CodeqlRuby
+# CodeQL Ruby
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/codeql_ruby`. To experiment with that code, run `bin/console` for an interactive prompt.
+This repo contains tools and example queries to use [CodeQL](https://securitylab.github.com/tools/codeql) to analyze and query Ruby codebases. Inspired by the [open-source CodeQL Go library](https://github.com/github/codeql-go) and taking some cues from the [CodeQL JavaScript extractor](https://github.com/github/codeql/tree/master/javascript/extractor), this project provides:
 
-TODO: Delete this and the text above, and describe your gem
+- a [QL database schema](https://help.semmle.com/codeql/advanced-glossary.html#ql-database-schema) defining Ruby semantics for the CodeQL engine
+- an [extractor](https://help.semmle.com/codeql/glossary.html#extractor) to generate a [CodeQL database](https://help.semmle.com/codeql/about-codeql.html#about-codeql-databases) from a Ruby codebase
+- a [CodeQL library](https://help.semmle.com/QL/ql-handbook/modules.html#library-modules) for the Ruby language to allow easy querying
+
+It is currently in **proof-of-concept** stage. Not only should you not use this in production, it's currently unusable for research. This will be updated as we get this thing off the ground, but for now it is only online as a demonstration and to allow anyone who would like to to try it out, fork it, or contribute their own code.
+
+## Dependencies
+
+This proof-of-concept is currently only tested using the following:
+
+|   tool | version                                                      |
+| -----: | ------------------------------------------------------------ |
+|  macOS | 10.15 - Catalina                                             |
+|   ruby | 2.7.0p0 using [rbenv](https://github.com/rbenv/rbenv)        |
+| codeql | [CLI tools](https://help.semmle.com/codeql/codeql-cli/procedures/get-started.html) version 2.2.3 |
+
+More setups will be supported in the future as this gets built out.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+To use the extractor and query library with CodeQL, you will need to have the CodeQL CLI tools downloaded and set up.
 
-```ruby
-gem 'codeql_ruby'
-```
+1. Follow the instructions on [Getting Started with the CodeQL CLI](https://help.semmle.com/codeql/codeql-cli/procedures/get-started.html)
 
-And then execute:
+2. Verify your CodeQL installation works by running `codeql resolve languages`
 
-    $ bundle install
+3. Clone this repo as a sibling directory to your CodeQL installation. If you follow the conventions outlined in the getting started guide, you can use this command:
 
-Or install it yourself as:
+   ```shell
+   $ pwd
+   # $HOME/codeql-home
+   
+   $ ls
+   codeql codeql-repo
+   
+   $ git clone https://github.com/agius/codeql_ruby.git codeql-ruby-repo
+   
+   $ ls
+   codeql codeql-repo codeql-ruby-repo
+   ```
 
-    $ gem install codeql_ruby
+4. Enter the directory and install the executable via the Rake task:
+
+   ```shell
+   $ cd codeql-ruby-repo
+   
+   # install dependencies for development & testing
+   $ bundle install
+   
+   # install the codeql_ruby gem to your local Ruby setup
+   $ bundle exec rake install
+   ```
+
+5. Symlink the extractor directory from this repo into your CodeQL CLI installation:
+
+   ```shell
+   $ cd ~/codeql-home/codeql
+   $ ln -s ~/codeql-home/codeql-ruby-repo/extractor ruby
+   ```
+
+6. Verify that Ruby is now one of the recognized languages for the CodeQL CLI:
+
+   ```shell
+   $ codeql resolve languages
+   # ...should see
+   # ruby ($HOME/codeql-home/codeql/ruby)
+   # ...in the list
+   ```
+
+With that, you should be good to go! Check out "Usage" and "Development" below.
 
 ## Usage
 
-TODO: Write usage instructions here
+Currently the extractor only extracts one file: `spec/base_unsafe_script/unsafe_command.rb` 
+
+You can create a database for this file by using the codeql create database functionality:
+
+```shell
+$ codeql database create ~/codeql-home/example-ruby-db --language=ruby
+```
+
+You should then see the CodeQL database in the provided folder:
+
+```shell
+$ ls -lha ~/codeql-home/example-ruby-db
+...
+codeql-database.yml
+...
+```
+
+You can run queries against this database using the CodeQL CLI - we'll use [the codeql query run command](https://help.semmle.com/codeql/codeql-cli/commands/query-run.html) for simplicity. This will run the spec example query from this repo, which simply outputs all nodes:
+
+```shell
+$ codeql query run --database=<db_dir> spec/spec/base_unsafe_script/example.ql
+# ...snip output
+Starting evaluation of base-unsafe-script-ruby-queries/example.ql.
+Evaluation completed (110ms).
+| col0 |         col1         |
++------+----------------------+
+| eval | This is a leaf node. |
+| ARGV | This is a leaf node. |
+| 1    | This is a leaf node. |
+```
+
+For more about learning CodeQL, see [Semmle / Github / Microsoft's guides here](https://help.semmle.com/QL/learn-ql/).
+
+### Using with Visual Studio Code
+
+To use the ruby library with Visual Studio Code, first you'll need to follow [the setup instructions for CodeQL in VS Code](https://help.semmle.com/codeql/codeql-for-vscode/procedures/setting-up.html). 
+
+If you had already set up the command line via the procedures above, the VS Code extension should detect the command-line installation and use it. You should now be able to use Ruby the same way as any other CodeQL-supported language, by adding the database generated above.
+
+If you have not already set up the CLI, you'll need to do that now, then [change the "Executable Path" setting](https://help.semmle.com/codeql/codeql-for-vscode/reference/settings.html#choosing-a-version-of-the-codeql-cli) in VS Code to ensure it is using your command-line installation (which has the symlinked `ruby` directory for Ruby language support).
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Make sure you've run through the setup procedure above so that the CodeQL CLI is working with Ruby support.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Feature development is ongoing.
+
+Run tests via:
+
+```shell
+$ bundle exec rake spec
+
+# ...or...
+
+$ bundle exec rspec
+```
+
+The spec suite includes a helper to create a CodeQL ruby database, run a query against it, and get the query results as JSON. It simply shells out to the CodeQL CLI installation to run the commands for you, building a db in the `build/` directory. See `spec_helper.rb` for the code which handles this.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/codeql_ruby. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/codeql_ruby/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/agius/codeql_ruby. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/agius/codeql_ruby/blob/master/CODE_OF_CONDUCT.md).
+
+To contribute a new feature or change:
+
+1. Fork this repo
+2. Create a feature branch
+3. Add your changes and write tests for them
+4. Push your changes to your fork of codeql_ruby
+5. Make a pull request to this repo
 
 
 ## License
@@ -41,4 +153,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the CodeqlRuby project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/codeql_ruby/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the CodeqlRuby project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/agius/codeql_ruby/blob/master/CODE_OF_CONDUCT.md).
