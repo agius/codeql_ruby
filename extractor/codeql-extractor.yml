@@ -1,0 +1,11 @@
+name: "ruby"
+display_name: "Ruby"
+version: 0.0.1
+column_kind: "utf16"
+unicode_newlines: true
+file_types:
+  - name: ruby
+    display_name: Ruby
+    extensions:
+      - .rb
+legacy_qltest_extraction: false

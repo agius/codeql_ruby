@@ -1,11 +1,14 @@
+require 'spec_helper'
+
 RSpec.describe CodeqlRuby do
   it "has a version number" do
     expect(CodeqlRuby::VERSION).not_to be nil
   end
 
-  it "extracts the things" do
-    filepath = File.join(File.expand_path(File.dirname(__FILE__)), 'unsafe_command.rb')
-    results = described_class.extract(filepath)
-    expect(results.first).to eq(:program)
+  it "extracts a db, runs a query, and generates JSON results" do
+    results = CodeqlRunner.results_for_db('base_unsafe_script')
+    tuples = results.dig('#select', 'tuples')
+
+    expect(tuples).to include(['eval', 'This is a leaf node.'])
   end
 end
