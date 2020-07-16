@@ -11,4 +11,19 @@ RSpec.describe CodeqlRuby do
 
     expect(tuples).to include(['eval', 'This is a leaf node.'])
   end
+
+  it "extracts a directory as a db and queries it" do
+    results = CodeqlRunner.results_for_db('script_with_require')
+    tuples = results.dig('#select', 'tuples')
+
+    expect(tuples).to include(['RequiredFile', 'This is a leaf node.'])
+  end
+
+  it "extracts a file to relevant trap structures" do
+    filepath = File.expand_path(File.join(File.dirname(__FILE__), 'script_with_require', 'script_with_require.rb'))
+    ef = CodeqlRuby::ExtractorFile.new(filepath)
+    results = ef.to_trap
+
+    expect(results).to be_a(String)
+  end
 end

@@ -6,7 +6,21 @@ This repo contains tools and example queries to use [CodeQL](https://securitylab
 - an [extractor](https://help.semmle.com/codeql/glossary.html#extractor) to generate a [CodeQL database](https://help.semmle.com/codeql/about-codeql.html#about-codeql-databases) from a Ruby codebase
 - a [CodeQL library](https://help.semmle.com/QL/ql-handbook/modules.html#library-modules) for the Ruby language to allow easy querying
 
-It is currently in **proof-of-concept** stage. Not only should you not use this in production, it's currently unusable for research. This will be updated as we get this thing off the ground, but for now it is only online as a demonstration and to allow anyone who would like to to try it out, fork it, or contribute their own code.
+## Proof of Concept
+
+This tool is currently in **proof-of-concept** stage. Not only should you not use this in production, it's currently unusable for research. This will be updated as we get this thing off the ground, but for now it is only online as a demonstration and to allow anyone who would like to to try it out, fork it, or contribute their own code.
+
+Progress will be tracked on [agius/codeql_ruby](https://github.com/agius/codeql_ruby), and you can follow it via:
+
+- [Pull requests](https://github.com/agius/codeql_ruby/pulls) for all code changes
+
+- [Github Projects on this repo](https://github.com/agius/codeql_ruby/projects) - currently on [Phase 2: Usefulness](https://github.com/agius/codeql_ruby/projects/1)
+
+If you have specific thoughts, suggestions, proposals, use cases, etc, please feel free to contact the maintainers:
+
+- [open an issue](https://github.com/agius/codeql_ruby/issues/new) on [agius/codeql_ruby](https://github.com/agius/codeql_ruby) 
+- [tweet at @agius](http://twitter.com/agius)
+- join us in the `#codeql-hacking` channel in the Github Security Lab Slack team - request an invite on [the Github Security Lab page](https://securitylab.github.com/get-involved)
 
 ## Dependencies
 
@@ -75,9 +89,15 @@ With that, you should be good to go! Check out "Usage" and "Development" below.
 
 ## Usage
 
-Currently the extractor only extracts one file: `spec/base_unsafe_script/unsafe_command.rb` 
+Currently the extractor extracts all Ruby files nested in the directory from which the extractor is run. Essentially all files found by:
 
-You can create a database for this file by using the codeql create database functionality:
+```shell
+$ find . -name '*.rb'
+```
+
+Expanding extraction to dependencies and related files is a work-in-progress.
+
+You can create a database for the directory by using the codeql create database functionality:
 
 ```shell
 $ codeql database create ~/codeql-home/example-ruby-db --language=ruby

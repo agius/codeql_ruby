@@ -1,11 +1,12 @@
 require 'ripper'
 require 'fileutils'
 require 'zlib'
+require 'set'
 
 module CodeqlRuby
   class Extractor
 
-    IDX_START = 10000
+    IDX_START = 10_000
 
     attr_reader :trap_dir, :wip_dir, :src_dir
 
@@ -21,10 +22,19 @@ module CodeqlRuby
     # CODEQL_EXTRACTOR_RUBY_TRAP_DIR=<db_dir>/trap/ruby
     # JAVA_MAIN_CLASS_50625=com.semmle.cli2.CodeQL
 
-    def initialize
+    def initialize(to_extract = nil)
+      to_extract = Dir.pwd if to_extract.nil?
       @wip_dir = setup_env_dir('CODEQL_EXTRACTOR_RUBY_WIP_DATABASE')
       @trap_dir = setup_env_dir('CODEQL_EXTRACTOR_RUBY_TRAP_DIR')
       @src_dir = setup_env_dir('CODEQL_EXTRACTOR_RUBY_SOURCE_ARCHIVE_DIR')
+      if File.directory?(to_extract)
+        @ex_dir = File.expand_path(to_extract)
+      elsif File.file?(to_extract)
+        @ex_file = File.expand_path(to_extract)
+      else
+        raise ArgumentError.new("to_extract must be a file or directory, found: #{to_extract}")
+      end
+      @files = Set.new
     end
 
     def setup_env_dir(evar)
@@ -37,14 +47,25 @@ module CodeqlRuby
     end
 
     def extract!
-      src_file = Dir['**/*.rb'].find { |p| p =~ /unsafe_command\.rb$/ }
-      expanded_path = File.expand_path(src_file)
-      extract_file(expanded_path)
+      if @ex_dir
+        Dir.glob File.join(@ex_dir, '**', '*.rb') do |srcpath|
+          extractor_file = ExtractorFile.new(File.expand_path(srcpath), source_kind: :source)
+          extract_file(extractor_file)
+        end
+      elsif @ex_file
+        extractor_file = ExtractorFile.new(@ex_file, source_kind: :source)
+        extract_file(extractor_file)
+      else
+        raise 'Nothing to extract!'
+      end
     end
 
-    def extract_file(filepath)
-      copy_file_to_src(filepath)
-      trapfile_for_code(filepath)
+    def extract_file(ex_file)
+      # Set.add? returns nil if file is already in the set
+      return unless @files.add? ex_file
+
+      copy_file_to_src(ex_file.filepath)
+      trapfile_for_code(ex_file)
     end
 
     def copy_file_to_src(filepath)
@@ -54,18 +75,10 @@ module CodeqlRuby
       FileUtils.cp(src, dest)
     end
 
-    def trapfile_for_code(filepath)
-      contents = File.read(filepath)
-      structure = Ripper.sexp(contents)
-      trap_contents = ""
-      idx = IDX_START
-      Node.new(structure).visit do |leaf_node|
-        idx += 1
-        trap_contents << "leaf_nodes(#{idx}, \"#{leaf_node.sexp[1]}\", #{leaf_node.sexp[2][0]}, #{leaf_node.sexp[2][1]})"
-      end
+    def trapfile_for_code(extractor_file)
+      trap_contents = extractor_file.to_trap
 
-      trapfile_name = "#{File.basename(filepath, '.rb')}.trap"
-      trapfile_path = File.join(trap_dir, trapfile_name)
+      trapfile_path = File.join(trap_dir, extractor_file.trapfile_name)
       File.open(trapfile_path, 'w') do |f|
         f.write(trap_contents)
       end
@@ -75,31 +88,6 @@ module CodeqlRuby
         gz.mtime = File.mtime(trapfile_path)
         gz.orig_name = File.basename(trapfile_path)
         gz.write IO.binread(trapfile_path)
-      end
-    end
-
-    class Node
-      attr_reader :sexp
-
-      def initialize(sexp)
-        @sexp = sexp
-      end
-
-      def visit(&block)
-        if leaf_node?
-          yield self
-        elsif sexp.respond_to?(:each)
-          sexp.each { |elem| Node.new(elem).visit(&block) }
-        else
-          # noop
-        end
-      end
-
-      def leaf_node?
-        sexp.is_a?(Array) &&
-          sexp[0].is_a?(Symbol) &&
-          sexp[1].is_a?(String) &&
-          sexp[2].is_a?(Array) && sexp[2].size == 2
       end
     end
   end

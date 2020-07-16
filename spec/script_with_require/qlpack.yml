@@ -1,0 +1,3 @@
+name: ruby-script-with-require
+version: 0.0.0
+libraryPathDependencies: codeql-ruby

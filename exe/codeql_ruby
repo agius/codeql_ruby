@@ -17,4 +17,4 @@ require "codeql_ruby"
 # CODEQL_EXTRACTOR_RUBY_TRAP_DIR=<db_dir>/trap/ruby
 # JAVA_MAIN_CLASS_50625=com.semmle.cli2.CodeQL
 
-CodeqlRuby.extract
+CodeqlRuby.extract ARGV.first
