@@ -68,6 +68,10 @@ jobs:
           sleep 1
           ln -s "$GITHUB_WORKSPACE" "$HOME/codeql-home/codeql-ruby-dir"
           sleep 1
+          echo "running ln -s '$GITHUB_WORKSPACE/extractor' '$HOME/codeql-home/codeql/ruby' in directory $PWD"
+          sleep 1
+          ln -s "$GITHUB_WORKSPACE/extractor" "$HOME/codeql-home/codeql/ruby"
+          sleep 1
           gem install bundler
           bundle install
           rake spec:ci
