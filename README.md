@@ -1,5 +1,7 @@
 # CodeQL Ruby
 
+![](https://github.com/agius/codeql_ruby/workflows/Continuous%20Integration%20with%20CodeQL/badge.svg?branch=main)
+
 This repo contains tools and example queries to use [CodeQL](https://securitylab.github.com/tools/codeql) to analyze and query Ruby codebases. Inspired by the [open-source CodeQL Go library](https://github.com/github/codeql-go) and taking some cues from the [CodeQL JavaScript extractor](https://github.com/github/codeql/tree/master/javascript/extractor), this project provides:
 
 - a [QL database schema](https://help.semmle.com/codeql/advanced-glossary.html#ql-database-schema) defining Ruby semantics for the CodeQL engine
