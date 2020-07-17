@@ -35,7 +35,7 @@ jobs:
           ls -lha .
           sleep 1
           echo "running curl -SsO in $PWD"
-          curl -SsO https://github.com/github/codeql-cli-binaries/releases/download/v2.2.4/codeql-linux64.zip
+          curl -SsOL https://github.com/github/codeql-cli-binaries/releases/download/v2.2.4/codeql-linux64.zip
           sleep 1
           echo "$PWD"
           ls -lha .
@@ -63,8 +63,6 @@ jobs:
           ls -lha "$HOME"
           sleep 1
           ls -lha "$HOME/codeql-home"
-          sleep 1
-          ls -lha "$HOME/codeql-home/codeql-ruby-dir"
           sleep 1
           echo "running ln -s '$GITHUB_WORKSPACE' '$HOME/codeql-home/codeql-ruby-dir' in directory $PWD"
           sleep 1
