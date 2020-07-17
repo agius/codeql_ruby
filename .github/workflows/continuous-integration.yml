@@ -36,17 +36,11 @@ jobs:
       - name: Download CodeQL
         if: steps.cache-codeql.outputs.cache-hit != 'true'
         run: |
-          echo "running curl -SsO in $PWD"
-          curl -SsOL https://github.com/github/codeql-cli-binaries/releases/download/$CODEQL_VERSION/codeql-linux64.zip
-          sleep 1
-          echo "$PWD"
-          ls -lha .
-          sleep 1
-          echo "running unzip in $PWD"
+          CODEQL_CLI_URL="https://github.com/github/codeql-cli-binaries/releases/download/$CODEQL_VERSION/codeql-linux64.zip"
+          echo "downloading CodeQL CLI from $CODEQL_CLI_URL"
+          curl -SsOL "$CODEQL_CLI_URL"
+          echo "Unzipping codeql-linux64.zip in $PWD"
           unzip -q codeql-linux64.zip
-          sleep 1
-          echo "$PWD"
-          ls -lha .
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -66,32 +60,32 @@ jobs:
 
       - name: Symlink extractor & ql tools
         run: |
-          echo "$PWD"
-          ls -lha .
-          sleep 1
-          echo "removing bad symlink if exists: running rm -f '$GITHUB_WORKSPACE/codeql/ruby'"
-          sleep 1
+          echo "Removing cached symlink if exists $GITHUB_WORKSPACE/codeql/ruby"
           rm -f "$GITHUB_WORKSPACE/codeql/ruby"
-          sleep 1
-          echo "running ln -s '$GITHUB_WORKSPACE/codeql-ruby/extractor' '$GITHUB_WORKSPACE/codeql/ruby' in directory $PWD"
-          sleep 1
+          echo "Symlinking '$GITHUB_WORKSPACE/codeql-ruby/extractor' to '$GITHUB_WORKSPACE/codeql/ruby'"
           ln -s "$GITHUB_WORKSPACE/codeql-ruby/extractor" "$GITHUB_WORKSPACE/codeql/ruby"
-          sleep 1
-          ls -lha .
-          sleep 1
-          ls -lha ./codeql-ruby
-          sleep 1
-          ls -lha ./codeql
-          sleep 1
+
+      - name: Cache Bundle Installs
+        uses: actions/cache@v2
+        with:
+          path: ./codeql-ruby/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Bundle install
+        working-directory: ./codeql-ruby
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
 
       - name: Build & run specs
         env:
           CODEQL_PATH: "$GITHUB_WORKSPACE/codeql/codeql"
         working-directory: ./codeql-ruby
         run: |
-          gem install bundler
-          bundle install
-          rake spec:ci
+          bundle exec rake spec:ci
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v2

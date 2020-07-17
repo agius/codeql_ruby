@@ -6,5 +6,9 @@ RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
 
-desc 'Build & install gem, run specs'
-task 'spec:ci' => ['install', 'spec']
+RSpec::Core::RakeTask.new('rspec:ci') do |t|
+  t.rspec_opts = "--format documentation --color --require spec_helper"
+end
+
+desc 'Build & install gem, run specs with CI output settings'
+task 'spec:ci' => ['install', 'rspec:ci']
