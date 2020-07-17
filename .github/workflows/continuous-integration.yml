@@ -1,0 +1,105 @@
+name: "Continuous Integration with CodeQL"
+
+env:
+  CODEQL_VERSION: v2.2.4
+
+on:
+  push:
+  pull_request:
+
+# largely cribbed from https://github.com/github/codeql-action
+jobs:
+  CodeQL-Build:
+    # CodeQL runs on ubuntu-latest, windows-latest, and macos-latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Ruby 2.6
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      - name: Cache CodeQL download
+        id: cache-codeql
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-codeql-download
+        with:
+          path: ./codeql
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.CODEQL_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Download CodeQL
+        if: steps.cache-codeql.outputs.cache-hit != 'true'
+        run: |
+          CODEQL_CLI_URL="https://github.com/github/codeql-cli-binaries/releases/download/$CODEQL_VERSION/codeql-linux64.zip"
+          echo "downloading CodeQL CLI from $CODEQL_CLI_URL"
+          curl -SsOL "$CODEQL_CLI_URL"
+          echo "Unzipping codeql-linux64.zip in $PWD"
+          unzip -q codeql-linux64.zip
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          # Must fetch at least the immediate parents so that if this is
+          # a pull request then we can checkout the head of the pull request.
+          # Only include this option if you are running this workflow on pull requests.
+          fetch-depth: 2
+          path: ./codeql-ruby
+
+      # If this run was triggered by a pull request event then checkout
+      # the head of the pull request instead of the merge commit.
+      # Only include this step if you are running this workflow on pull requests.
+      - run: git checkout HEAD^2
+        working-directory: ./codeql-ruby
+        if: ${{ github.event_name == 'pull_request' }}
+
+      - name: Symlink extractor & ql tools
+        run: |
+          echo "Removing cached symlink if exists $GITHUB_WORKSPACE/codeql/ruby"
+          rm -f "$GITHUB_WORKSPACE/codeql/ruby"
+          echo "Symlinking '$GITHUB_WORKSPACE/codeql-ruby/extractor' to '$GITHUB_WORKSPACE/codeql/ruby'"
+          ln -s "$GITHUB_WORKSPACE/codeql-ruby/extractor" "$GITHUB_WORKSPACE/codeql/ruby"
+
+      - name: Cache Bundle Installs
+        uses: actions/cache@v2
+        with:
+          path: ./codeql-ruby/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Bundle install
+        working-directory: ./codeql-ruby
+        run: |
+          gem install bundler
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Build & run specs
+        env:
+          CODEQL_PATH: "$GITHUB_WORKSPACE/codeql/codeql"
+        working-directory: ./codeql-ruby
+        run: |
+          bundle exec rake spec:ci
+
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v2
+
+      # ℹ️ Command-line programs to run using the OS shell.
+      # 📚 https://git.io/JvXDl
+
+      # ✏️ If the Autobuild fails above, remove it and uncomment the following
+      #    three lines and modify them (or add more) to build your code if your
+      #    project uses a compiled language
+
+      #- run: |
+      #   make bootstrap
+      #   make release
+
+      # - name: Perform CodeQL Analysis
+      #   uses: github/codeql-action/analyze@v1

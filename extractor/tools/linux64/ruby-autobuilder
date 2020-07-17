@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+if [ "$CODEQL_PLATFORM" != "linux64" ] ; then
+  echo "Automatic build detection for $CODEQL_PLATFORM is not implemented."
+  exit 1
+fi
+
+codeql_ruby $@
