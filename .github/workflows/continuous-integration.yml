@@ -1,5 +1,8 @@
 name: "Continuous Integration with CodeQL"
 
+env:
+  CODEQL_VERSION: v2.2.4
+
 on:
   push:
   pull_request:
@@ -16,11 +19,25 @@ jobs:
         with:
           ruby-version: 2.6
 
+      - name: Cache CodeQL download
+        id: cache-codeql
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-codeql-download
+        with:
+          path: ./codeql
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.CODEQL_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
       # Initializes the CodeQL tools for scanning.
       - name: Download CodeQL
+        if: steps.cache-codeql.outputs.cache-hit != 'true'
         run: |
           echo "running curl -SsO in $PWD"
-          curl -SsOL https://github.com/github/codeql-cli-binaries/releases/download/v2.2.4/codeql-linux64.zip
+          curl -SsOL https://github.com/github/codeql-cli-binaries/releases/download/$CODEQL_VERSION/codeql-linux64.zip
           sleep 1
           echo "$PWD"
           ls -lha .
@@ -51,6 +68,10 @@ jobs:
         run: |
           echo "$PWD"
           ls -lha .
+          sleep 1
+          echo "removing bad symlink if exists: running rm -f '$GITHUB_WORKSPACE/codeql/ruby'"
+          sleep 1
+          rm -f "$GITHUB_WORKSPACE/codeql/ruby"
           sleep 1
           echo "running ln -s '$GITHUB_WORKSPACE/codeql-ruby/extractor' '$GITHUB_WORKSPACE/codeql/ruby' in directory $PWD"
           sleep 1
