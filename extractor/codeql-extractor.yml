@@ -8,4 +8,4 @@ file_types:
     display_name: Ruby
     extensions:
       - .rb
-legacy_qltest_extraction: false
+legacy_qltest_extraction: true

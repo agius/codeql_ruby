@@ -1,0 +1,4 @@
+| leaf_node_location.rb:1:0:1:4 | LeafNode | puts | leaf_node_location.rb:1 |
+| leaf_node_location.rb:1:0:1:4 | LeafNode | puts | leaf_node_location.rb:1 |
+| leaf_node_location.rb:1:6:1:40 | LeafNode | this file contains some leaf nodes | leaf_node_location.rb:1 |
+| leaf_node_location.rb:1:6:1:40 | LeafNode | this file contains some leaf nodes | leaf_node_location.rb:1 |
