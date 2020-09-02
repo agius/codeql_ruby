@@ -87,6 +87,13 @@ jobs:
         run: |
           bundle exec rake spec:ci
 
+      - name: Run CodeQL Tests
+        env:
+          CODEQL_PATH: "$GITHUB_WORKSPACE/codeql/codeql"
+        working-directory: ./codeql-ruby
+        run: |
+          $CODEQL_PATH test run ql/test
+
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v2
 
