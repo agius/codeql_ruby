@@ -92,7 +92,7 @@ jobs:
           CODEQL_PATH: "$GITHUB_WORKSPACE/codeql/codeql"
         working-directory: ./codeql-ruby
         run: |
-          $GITHUB_WORKSPACE/codeql/codeql test run ql/test
+          $GITHUB_WORKSPACE/codeql/codeql test run -vvv ql/test
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v2
