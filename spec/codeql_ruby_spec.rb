@@ -26,4 +26,11 @@ RSpec.describe CodeqlRuby do
 
     expect(results).to be_a(String)
   end
+
+  it "extracts Location info from LeafNodes" do
+    results = CodeqlRunner.results_for_db('leaf_node_location')
+    tuples = results.dig('#select', 'tuples')
+
+    expect(tuples).to include([{'label'=>'LeafNode'}, 'puts', 'leaf_node_location.rb:1'])
+  end
 end

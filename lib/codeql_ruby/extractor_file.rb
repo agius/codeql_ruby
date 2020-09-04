@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'pathname'
 
 module CodeqlRuby
   class ExtractorFile

@@ -14,8 +14,10 @@ import ruby
  * 1
  * ```
  */
-class LeafNode extends @leaf_node {
+class LeafNode extends @leaf_node, Locatable {
   string getText() { leaf_nodes(this, result, _, _) }
 
-  string toString() { result = "LeafNode" }
+  override Location getLocation() { has_location(this, result) }
+
+  override string toString() { result = "LeafNode" }
 }
