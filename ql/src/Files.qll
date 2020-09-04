@@ -1,9 +1,9 @@
-/** 
- * Provides classes for working with files and folders. 
- * 
+/**
+ * Provides classes for working with files and folders.
+ *
  * Stolen liberally from the Javascript QLL
  * https://github.com/github/codeql/blob/813d14791d6bea399bc96fa9b7143603eef6e6c4/javascript/ql/src/semmle/javascript/Files.qll
- * 
+ *
  */
 
 import ruby

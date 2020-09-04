@@ -1,10 +1,9 @@
-{ 
-  "provide": [ 
+{
+  "provide": [
     "ql/src/qlpack.yml",
-    "ql/test/qlpack.yml",
-    "extractor/codeql-extractor.yml" 
+    "extractor/codeql-extractor.yml"
   ],
-  "ignore": [ 
-    "the-extractor-which-needs-to-be-built" 
-  ] 
+  "ignore": [
+    "the-extractor-which-needs-to-be-built"
+  ]
 }

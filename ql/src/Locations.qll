@@ -1,9 +1,9 @@
-/** 
- * Provides classes for working with locations and program elements that have locations. 
- * 
+/**
+ * Provides classes for working with locations and program elements that have locations.
+ *
  * Stolen liberally from the Javascript QL library:
  * https://github.com/github/codeql/blob/813d14791d6bea399bc96fa9b7143603eef6e6c4/javascript/ql/src/semmle/javascript/Locations.qll
- * 
+ *
  */
 
 import ruby
