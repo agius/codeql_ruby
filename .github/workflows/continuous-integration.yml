@@ -88,9 +88,10 @@ jobs:
           bundle exec rake spec:ci
 
       - name: Run CodeQL Tests
+        working-directory: ./codeql-ruby
         run: |
           bundle exec rake install
-          $GITHUB_WORKSPACE/codeql/codeql test run -vvvvv codeql-ruby/ql/test
+          $GITHUB_WORKSPACE/codeql/codeql test run -vvvvv ql/test
 
       # - name: Setup tmate session
       #   uses: mxschmitt/action-tmate@v2
