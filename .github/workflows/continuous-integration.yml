@@ -89,14 +89,7 @@ jobs:
 
       - name: Run CodeQL Tests
         run: |
-          ls -lha /home
-          ls -lha /home/runner
-          ls -lha /home/runner/work
-          ls -lha /home/runner/work/codeql_ruby
-          ls -lha /home/runner/work/codeql_ruby/codeql_ruby/
-          ls -lha /home/runner/work/codeql_ruby/codeql_ruby/codeql/
-          ls -lha /home/runner/work/codeql_ruby/codeql_ruby/codeql/ruby/
-          ls -lha /home/runner/work/codeql_ruby/codeql_ruby/codeql/ruby/tools/
+          bundle exec rake install
           $GITHUB_WORKSPACE/codeql/codeql test run -vvvvv codeql-ruby/ql/test
 
       # - name: Setup tmate session

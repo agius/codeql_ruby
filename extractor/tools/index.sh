@@ -1,7 +1,5 @@
 #!/bin/sh
 
-exit 187
-
 ####################################################################################
 #
 # Required for running `codeql test run my/test/dir`
