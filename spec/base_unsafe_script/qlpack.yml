@@ -1,3 +1,0 @@
-name: base-unsafe-script-ruby-queries
-version: 0.0.0
-libraryPathDependencies: codeql-ruby

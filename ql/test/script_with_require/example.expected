@@ -1,0 +1,14 @@
+| . | This is a leaf node. |
+| ./required_file | This is a leaf node. |
+| @fullpath | This is a leaf node. |
+| File | This is a leaf node. |
+| RequiredFile | This is a leaf node. |
+| __FILE__ | This is a leaf node. |
+| attr_reader | This is a leaf node. |
+| expand_path | This is a leaf node. |
+| fullpath | This is a leaf node. |
+| initialize | This is a leaf node. |
+| new | This is a leaf node. |
+| puts | This is a leaf node. |
+| require_relative | This is a leaf node. |
+| rf | This is a leaf node. |

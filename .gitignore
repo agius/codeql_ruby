@@ -11,6 +11,9 @@
 # rspec failure tracking
 .rspec_status
 
+# CodeQL test runner databases
+*.testproj
+
 .cache/
 
 TODOS.md
